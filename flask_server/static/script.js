@@ -4,6 +4,7 @@ const els = {
   adc: document.getElementById('adc'),
   voltage: document.getElementById('voltage'),
   resistance: document.getElementById('resistance'),
+  macAddress: document.getElementById('macAddress'),
   lastUpdate: document.getElementById('lastUpdate'),
   currentPattern: document.getElementById('currentPattern'),
   patternButtons: document.querySelectorAll('[data-pattern]'),
@@ -26,6 +27,7 @@ async function fetchStatus() {
     els.adc.textContent = data.adc ?? '--';
     els.voltage.textContent = `${formatNumber(data.voltage, 3)} V`;
     els.resistance.textContent = `${formatNumber(data.resistance, 1)} Ω`;
+    els.macAddress.textContent = data.mac_address || '--';
     els.lastUpdate.textContent = data.last_update || 'No data yet';
     els.currentPattern.textContent = data.pattern || 'solid';
 
