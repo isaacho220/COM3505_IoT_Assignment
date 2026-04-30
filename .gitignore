@@ -1,0 +1,14 @@
+# Secrets
+esp32/include/secrets.h
+secrets.h
+
+# PlatformIO
+.pio/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

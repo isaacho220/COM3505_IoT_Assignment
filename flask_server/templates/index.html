@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COM3505 IoT Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <p class="eyebrow">COM3505 IoT Assignment</p>
+      <h1>ESP32 Sensor and LED Control Dashboard</h1>
+      <p class="subtitle">Live NTC thermistor reading with browser-controlled LED animation patterns.</p>
+    </header>
+
+    <section class="grid">
+      <article class="card sensor-card">
+        <h2>Sensor Data</h2>
+        <div class="temp-display">
+          <span id="temperature">--</span>
+          <span class="unit">°C</span>
+        </div>
+        <dl class="details">
+          <div>
+            <dt>Status</dt>
+            <dd id="valid">Waiting for ESP32</dd>
+          </div>
+          <div>
+            <dt>ADC</dt>
+            <dd id="adc">--</dd>
+          </div>
+          <div>
+            <dt>Voltage</dt>
+            <dd id="voltage">--</dd>
+          </div>
+          <div>
+            <dt>Resistance</dt>
+            <dd id="resistance">--</dd>
+          </div>
+          <div>
+            <dt>Last update</dt>
+            <dd id="lastUpdate">--</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="card">
+        <h2>LED Pattern Control</h2>
+        <p class="current">Current pattern: <strong id="currentPattern">solid</strong></p>
+        <div class="button-grid">
+          <button data-pattern="solid">Solid</button>
+          <button data-pattern="blink">Blink</button>
+          <button data-pattern="chase">Chase</button>
+          <button data-pattern="rainbow">Rainbow</button>
+          <button data-pattern="fire">Fire</button>
+          <button data-pattern="temperature">Temperature Alert</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
