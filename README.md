@@ -267,13 +267,3 @@ Check that:
 - the voltage divider wiring is correct.
 - the ADC reading is not stuck near `0` or `4095`.
 
-## Notes for marking/demo
-
-Before demonstrating the project:
-
-1. Start the Flask server first.
-2. Confirm your computer IP address.
-3. Update `FLASK_SERVER_BASE_URL` in `main.cpp` if your IP address has changed.
-4. Upload the ESP32 code.
-5. Open the Serial Monitor and confirm that POST/GET requests return successful status codes.
-6. Open the browser dashboard and test each LED pattern.
