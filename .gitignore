@@ -1,14 +1,23 @@
-# Secrets
-esp32/include/secrets.h
-secrets.h
-
 # PlatformIO
 .pio/
+esp32/.pio/
 
-# Python
+# VS Code generated/editor files
+.vscode/
+*.code-workspace
+
+# Python virtual environment
 venv/
+flask_server/venv/
+
+# Python cache
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # macOS
 .DS_Store
+__MACOSX/
+
+# Secrets
+secrets.h

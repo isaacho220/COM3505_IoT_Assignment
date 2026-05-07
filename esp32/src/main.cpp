@@ -8,6 +8,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <math.h>
+#include <ArduinoJson.h>
 
 // -----------------------------------------------------------------------------
 // User configuration
@@ -23,9 +24,9 @@
 //   #define FLASK_SERVER_BASE_URL "http://192.168.1.23:5001"
 //
 // The ESP32 and the Flask server must be connected to the same WiFi network.
-#define WIFI_SSID "YOUR_WIFI_SSID"
-#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
-#define FLASK_SERVER_BASE_URL "http://YOUR_IP_ADDRESS:5001"
+#define WIFI_SSID "ENTER_YOUR_WIFI_SSID_HERE"
+#define WIFI_PASSWORD "ENTER_YOUR_WIFI_PASSWORD_HERE"
+#define FLASK_SERVER_BASE_URL "http://ENTER_YOUR_WIFI_IP_HERE:5001"
 
 // -----------------------------------------------------------------------------
 // Pin configuration
@@ -315,34 +316,29 @@ void postSensorData()
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(3000);
 
-  // Build a compact JSON payload manually to avoid extra dependencies.
-  String payload = "{";
-  payload += "\"temperature_c\":";
+  // Build the JSON payload using ArduinoJson instead of manually joining strings.
+  // This is safer because ArduinoJson handles valid JSON formatting automatically.
+  JsonDocument doc;
 
   if (latestReadingValid && !isnan(latestTemperatureC)) {
-    payload += String(latestTemperatureC, 2);
+    doc["temperature_c"] = latestTemperatureC;
   } else {
-    payload += "null";
+    doc["temperature_c"] = nullptr;
   }
 
-  payload += ",\"adc\":";
-  payload += String(latestAdc);
-
-  payload += ",\"voltage\":";
-  payload += String(latestVoltage, 3);
-
-  payload += ",\"resistance\":";
+  doc["adc"] = latestAdc;
+  doc["voltage"] = latestVoltage;
 
   if (latestReadingValid && !isnan(latestResistance)) {
-    payload += String(latestResistance, 2);
+    doc["resistance"] = latestResistance;
   } else {
-    payload += "null";
+    doc["resistance"] = nullptr;
   }
 
-  payload += ",\"valid\":";
-  payload += latestReadingValid ? "true" : "false";
+  doc["valid"] = latestReadingValid;
 
-  payload += "}";
+  String payload;
+  serializeJson(doc, payload);
 
   int httpCode = http.POST(payload);
 
@@ -380,14 +376,28 @@ void getPatternFromServer()
   Serial.println(httpCode);
 
   if (httpCode == 200) {
-    String pattern = http.getString();
-    pattern.trim();
-    pattern.toLowerCase();
+    String response = http.getString();
 
-    if (pattern.length() > 0) {
-      currentPattern = pattern;
-      Serial.print("Current pattern updated to: ");
-      Serial.println(currentPattern);
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, response);
+
+    if (error) {
+      Serial.print("Failed to parse pattern JSON: ");
+      Serial.println(error.c_str());
+    } else {
+      const char* patternValue = doc["pattern"];
+
+      if (patternValue != nullptr) {
+        String pattern = String(patternValue);
+        pattern.trim();
+        pattern.toLowerCase();
+
+        if (pattern.length() > 0) {
+          currentPattern = pattern;
+          Serial.print("Current pattern updated to: ");
+          Serial.println(currentPattern);
+        }
+      }
     }
   } else if (httpCode > 0) {
     Serial.print("GET response: ");

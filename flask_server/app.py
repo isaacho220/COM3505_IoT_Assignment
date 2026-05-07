@@ -72,8 +72,8 @@ def get_status():
 
 @app.route("/api/pattern", methods=["GET"])
 def get_pattern():
-    """Return the current LED pattern as plain text for ESP32 polling."""
-    return latest_state["pattern"], 200, {"Content-Type": "text/plain; charset=utf-8"}
+    """Return the current LED pattern as JSON for ESP32 polling."""
+    return jsonify({"pattern": latest_state["pattern"]})
 
 
 @app.route("/api/pattern", methods=["POST"])

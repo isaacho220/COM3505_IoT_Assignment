@@ -196,6 +196,34 @@ http://127.0.0.1:5001
 
 From the dashboard, select an LED pattern. The ESP32 polls the Flask server every 2 seconds and should update the LEDs.
 
+## JSON communication
+
+The ESP32 uses ArduinoJson to create the JSON payload sent to the Flask server through `/api/sensor`. This payload includes the latest temperature, ADC value, voltage, resistance, and validity status.
+
+The ESP32 also uses ArduinoJson to parse the JSON response from `/api/pattern`, which tells the ESP32 which LED pattern should run.
+
+Example sensor payload sent from the ESP32:
+
+```json
+{
+  "temperature_c": 24.6,
+  "adc": 1860,
+  "voltage": 1.50,
+  "resistance": 230.4,
+  "valid": true
+}
+```
+
+Example pattern response from Flask:
+
+```json
+{
+  "pattern": "chase"
+}
+```
+
+This means ArduinoJson is used for both serialising ESP32 sensor data and deserialising Flask server responses.
+
 ## Troubleshooting
 
 ### ESP32 cannot connect to WiFi
