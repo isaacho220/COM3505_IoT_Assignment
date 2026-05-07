@@ -23,9 +23,9 @@
 //   #define FLASK_SERVER_BASE_URL "http://192.168.1.23:5001"
 //
 // The ESP32 and the Flask server must be connected to the same WiFi network.
-#define WIFI_SSID "Jonathan's Galaxy S21 FE 5G"
-#define WIFI_PASSWORD "pewr5332"
-#define FLASK_SERVER_BASE_URL "http://10.172.0.13:5001"
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#define FLASK_SERVER_BASE_URL "http://YOUR_IP_ADDRESS:5001"
 
 // -----------------------------------------------------------------------------
 // Pin configuration
