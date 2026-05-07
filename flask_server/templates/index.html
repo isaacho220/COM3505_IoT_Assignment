@@ -4,9 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>COM3505 IoT Dashboard</title>
+
+  <!-- Flask serves this file from flask_server/static/style.css. -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
+  <!-- Main dashboard container. It is split into two cards: live sensor data and
+       LED pattern controls. -->
   <main class="page">
     <header class="header">
       <p class="eyebrow">COM3505 IoT Assignment</p>
@@ -15,6 +19,8 @@
     </header>
 
     <section class="grid">
+      <!-- Sensor card: values are filled in by static/script.js after calling
+           the Flask /api/status endpoint. -->
       <article class="card sensor-card">
         <h2>Sensor Data</h2>
         <div class="temp-display">
@@ -45,6 +51,8 @@
         </dl>
       </article>
 
+      <!-- LED control card: each button stores its target pattern in the
+           data-pattern attribute so JavaScript can send it to Flask. -->
       <article class="card">
         <h2>LED Pattern Control</h2>
         <p class="current">Current pattern: <strong id="currentPattern">--</strong></p>
@@ -60,6 +68,7 @@
     </section>
   </main>
 
+  <!-- Browser-side script for fetching sensor data and sending pattern changes. -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

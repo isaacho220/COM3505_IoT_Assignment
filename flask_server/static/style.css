@@ -1,9 +1,12 @@
+/* Base styling for the Flask web dashboard. The design is intentionally simple
+   so it remains readable on a laptop or mobile browser during demonstration. */
 :root {
   font-family: Arial, Helvetica, sans-serif;
   color: #172033;
   background: #f4f7fb;
 }
 
+/* Include padding and borders in element widths to make layout sizing easier. */
 * {
   box-sizing: border-box;
 }
@@ -12,6 +15,7 @@ body {
   margin: 0;
 }
 
+/* Limit the page width so the dashboard does not stretch too far on large screens. */
 .page {
   max-width: 980px;
   margin: 0 auto;
@@ -41,6 +45,8 @@ h1 {
   color: #526173;
 }
 
+/* Responsive card layout. On wider screens the cards sit side by side; on small
+   screens they stack automatically. */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -60,6 +66,7 @@ h1 {
   font-size: 1.2rem;
 }
 
+/* Large temperature display to make the live sensor value immediately visible. */
 .temp-display {
   display: flex;
   align-items: baseline;
@@ -78,6 +85,7 @@ h1 {
   color: #526173;
 }
 
+/* Definition list used for ADC, voltage, resistance and update metadata. */
 .details {
   display: grid;
   gap: 10px;
@@ -107,6 +115,7 @@ dd {
   color: #526173;
 }
 
+/* Two-column button layout for selecting LED patterns. */
 .button-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -128,10 +137,12 @@ button:hover {
   background: #1d4ed8;
 }
 
+/* The currently selected pattern is highlighted by script.js. */
 button.active {
   background: #0f172a;
 }
 
+/* Mobile adjustment: reduce padding and stack LED buttons into one column. */
 @media (max-width: 560px) {
   .page {
     padding: 20px 12px;

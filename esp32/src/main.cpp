@@ -1,19 +1,39 @@
 // COM3505 IoT Assignment
-// ESP32-S3 Feather + NTC Thermistor + 3 LED Patterns + Flask Server
+// ESP32-S3 Feather + NTC Thermistor + 3 LED Patterns + Flask Web Dashboard
+//
+// This program reads an NTC thermistor, sends the readings to a Flask server,
+// and polls the Flask server for the LED pattern selected in the browser UI.
 
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <math.h>
+
+// -----------------------------------------------------------------------------
+// User configuration
+// -----------------------------------------------------------------------------
+// Before uploading this sketch, change these three values for your own network.
+// 1. WIFI_SSID: your WiFi network name.
+// 2. WIFI_PASSWORD: your WiFi password. Leave it as "" for an open network.
+// 3. FLASK_SERVER_BASE_URL: the IP address of the laptop/PC running app.py.
+//
+// Example:
+//   #define WIFI_SSID "MyPhoneHotspot"
+//   #define WIFI_PASSWORD "my-password"
+//   #define FLASK_SERVER_BASE_URL "http://192.168.1.23:5001"
+//
+// The ESP32 and the Flask server must be connected to the same WiFi network.
 #define WIFI_SSID "Jonathan's Galaxy S21 FE 5G"
 #define WIFI_PASSWORD "pewr5332"
 #define FLASK_SERVER_BASE_URL "http://10.172.0.13:5001"
 
-// ---------------- Pin Configuration ----------------
-// Adafruit ESP32-S3 Feather:
-// A1 = GPIO17, A2 = GPIO16, A3 = GPIO15, D5 = GPIO5, D6 = GPIO6, D9 = GPIO9
-
-const int thermistorPin = A2;   // Same as your working Ex12.cpp
+// -----------------------------------------------------------------------------
+// Pin configuration
+// -----------------------------------------------------------------------------
+// Adafruit ESP32-S3 Feather pin mapping used in this project:
+// A2 = GPIO16, D5 = GPIO5, D6 = GPIO6, D9 = GPIO9.
+// The thermistor voltage divider is connected to A2.
+const int thermistorPin = A2;
 
 const int redLedPin = 5;        // D5
 const int yellowLedPin = 6;     // D6
@@ -22,7 +42,12 @@ const int greenLedPin = 9;      // D9
 const int ledPins[] = { redLedPin, yellowLedPin, greenLedPin };
 const int ledCount = sizeof(ledPins) / sizeof(ledPins[0]);
 
-// ---------------- Thermistor Configuration ----------------
+// -----------------------------------------------------------------------------
+// Thermistor configuration
+// -----------------------------------------------------------------------------
+// These values should match the physical thermistor circuit.
+// This version assumes a 180 ohm fixed resistor and a thermistor calibrated
+// against 180 ohm at 25 C, matching the working assignment setup.
 const float referenceVoltage = 3.3;
 const float referenceResistor = 180.0;
 const float beta = 3950.0;
@@ -31,8 +56,11 @@ const float nominalResistance = 180.0;
 
 #define ADC_MAX 4095.0
 
-// ---------------- Timing ----------------
-
+// -----------------------------------------------------------------------------
+// Timing configuration
+// -----------------------------------------------------------------------------
+// These intervals control how often the ESP32 communicates with the Flask server.
+// millis() is used instead of long delay() calls so the LED patterns stay active.
 const unsigned long sensorPostIntervalMs = 2000;
 const unsigned long patternGetIntervalMs = 2000;
 const unsigned long wifiReconnectIntervalMs = 5000;
@@ -42,8 +70,9 @@ unsigned long lastPatternGetMs = 0;
 unsigned long lastWifiReconnectMs = 0;
 unsigned long lastPatternUpdateMs = 0;
 
-// ---------------- State ----------------
-
+// -----------------------------------------------------------------------------
+// Runtime state
+// -----------------------------------------------------------------------------
 String currentPattern = "solid";
 
 float latestTemperatureC = NAN;
@@ -52,8 +81,9 @@ float latestVoltage = 0.0;
 float latestResistance = NAN;
 bool latestReadingValid = false;
 
-// ---------------- WiFi ----------------
-
+// -----------------------------------------------------------------------------
+// WiFi connection helpers
+// -----------------------------------------------------------------------------
 void beginWiFi()
 {
   WiFi.mode(WIFI_STA);
@@ -64,7 +94,7 @@ void beginWiFi()
   Serial.println(WIFI_SSID);
 
   if (strlen(WIFI_PASSWORD) == 0) {
-    WiFi.begin(WIFI_SSID);              // ASK4 Wireless after MAC registration
+    WiFi.begin(WIFI_SSID);              // For open networks after registration, if applicable.
   } else {
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   }
@@ -114,8 +144,9 @@ void maintainWiFi()
   }
 }
 
-// ---------------- LEDs ----------------
-
+// -----------------------------------------------------------------------------
+// LED pattern helpers
+// -----------------------------------------------------------------------------
 void setAllLeds(bool on)
 {
   for (int i = 0; i < ledCount; i++) {
@@ -154,7 +185,7 @@ void runChasePattern()
 
   if (millis() - lastPatternUpdateMs >= interval) {
     lastPatternUpdateMs = millis();
-    setSingleLed(index);
+    setSingleLed((ledCount - 1) - index);
     index = (index + 1) % ledCount;
   }
 }
@@ -166,7 +197,7 @@ void runRainbowPattern()
 
   if (millis() - lastPatternUpdateMs >= interval) {
     lastPatternUpdateMs = millis();
-    setSingleLed((ledCount - 1) - index);
+    setSingleLed(index);
     index = (index + 1) % ledCount;
   }
 }
@@ -186,16 +217,18 @@ void runFirePattern()
 
 void runTemperaturePattern()
 {
+  // Temperature mode uses a simple threshold display:
+  // green = cool, yellow = warm, red = hot.
   if (!latestReadingValid || isnan(latestTemperatureC)) {
     setAllLeds(false);
     return;
   }
 
-  if (latestTemperatureC >= 35.0) {
+  if (latestTemperatureC >= 30.0) {
     digitalWrite(redLedPin, HIGH);
     digitalWrite(yellowLedPin, LOW);
     digitalWrite(greenLedPin, LOW);
-  } else if (latestTemperatureC >= 25.0) {
+  } else if (latestTemperatureC >= 24.0) {
     digitalWrite(redLedPin, LOW);
     digitalWrite(yellowLedPin, HIGH);
     digitalWrite(greenLedPin, LOW);
@@ -225,22 +258,24 @@ void updateLedPattern()
   }
 }
 
-// ---------------- Thermistor ----------------
-
+// -----------------------------------------------------------------------------
+// Thermistor reading
+// -----------------------------------------------------------------------------
 float readTemperatureC()
 {
-  // Same thermistor calculation as your working Ex12.cpp
   latestAdc = analogRead(thermistorPin);
-
   latestVoltage = latestAdc * referenceVoltage / ADC_MAX;
 
+  // Reject readings that are too close to 0 V or 3.3 V because they normally
+  // indicate a disconnected wire, short circuit, or invalid voltage divider.
   if (latestVoltage <= 0.01 || latestVoltage >= referenceVoltage - 0.01) {
     latestResistance = NAN;
     latestReadingValid = false;
     return NAN;
   }
 
-  // Voltage divider equation from Ex12.cpp
+  // Voltage divider equation: calculates the thermistor resistance from the ADC
+  // voltage using the known fixed resistor value.
   latestResistance = (latestVoltage * referenceResistor) /
                      (referenceVoltage - latestVoltage);
 
@@ -249,7 +284,8 @@ float readTemperatureC()
     return NAN;
   }
 
-  // Beta equation from Ex12.cpp
+  // Beta equation: converts thermistor resistance to temperature in Kelvin,
+  // then the result is converted to Celsius.
   float tempK = 1.0 / ((log(latestResistance / nominalResistance) / beta) +
                        (1.0 / (nominalTemperature + 273.15)));
 
@@ -257,8 +293,9 @@ float readTemperatureC()
   return tempK - 273.15;
 }
 
-// ---------------- Flask Communication ----------------
-
+// -----------------------------------------------------------------------------
+// Flask server communication
+// -----------------------------------------------------------------------------
 String buildUrl(const String& path)
 {
   return String(FLASK_SERVER_BASE_URL) + path;
@@ -278,6 +315,7 @@ void postSensorData()
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(3000);
 
+  // Build a compact JSON payload manually to avoid extra dependencies.
   String payload = "{";
   payload += "\"temperature_c\":";
 
@@ -362,8 +400,9 @@ void getPatternFromServer()
   http.end();
 }
 
-// ---------------- Setup and Loop ----------------
-
+// -----------------------------------------------------------------------------
+// Arduino setup and loop
+// -----------------------------------------------------------------------------
 void setup()
 {
   Serial.begin(115200);
