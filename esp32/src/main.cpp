@@ -5,8 +5,9 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <math.h>
-
-#include "secrets.h"
+#define WIFI_SSID "Jonathan's Galaxy S21 FE 5G"
+#define WIFI_PASSWORD "pewr5332"
+#define FLASK_SERVER_BASE_URL "http://10.172.0.13:5001"
 
 // ---------------- Pin Configuration ----------------
 // Adafruit ESP32-S3 Feather:
@@ -22,7 +23,6 @@ const int ledPins[] = { redLedPin, yellowLedPin, greenLedPin };
 const int ledCount = sizeof(ledPins) / sizeof(ledPins[0]);
 
 // ---------------- Thermistor Configuration ----------------
-// Same values as your working Ex12.cpp
 const float referenceVoltage = 3.3;
 const float referenceResistor = 180.0;
 const float beta = 3950.0;
@@ -166,7 +166,7 @@ void runRainbowPattern()
 
   if (millis() - lastPatternUpdateMs >= interval) {
     lastPatternUpdateMs = millis();
-    setSingleLed(index);
+    setSingleLed((ledCount - 1) - index);
     index = (index + 1) % ledCount;
   }
 }
@@ -191,7 +191,7 @@ void runTemperaturePattern()
     return;
   }
 
-  if (latestTemperatureC >= 30.0) {
+  if (latestTemperatureC >= 35.0) {
     digitalWrite(redLedPin, HIGH);
     digitalWrite(yellowLedPin, LOW);
     digitalWrite(greenLedPin, LOW);

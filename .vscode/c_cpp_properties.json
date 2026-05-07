@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "/Users/isaacho/COM3505_IoT_Assignment/include",
                 "/Users/isaacho/COM3505_IoT_Assignment/src",
+                "/Users/isaacho/COM3505_IoT_Assignment/.pio/libdeps/adafruit_feather_esp32s3/ArduinoJson/src",
                 "/Users/isaacho/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include",
                 "/Users/isaacho/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include",
                 "/Users/isaacho/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos",
@@ -247,8 +247,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "/Users/isaacho/COM3505_IoT_Assignment/include",
                     "/Users/isaacho/COM3505_IoT_Assignment/src",
+                    "/Users/isaacho/COM3505_IoT_Assignment/.pio/libdeps/adafruit_feather_esp32s3/ArduinoJson/src",
                     "/Users/isaacho/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include",
                     "/Users/isaacho/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include",
                     "/Users/isaacho/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos",
